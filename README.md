@@ -81,6 +81,8 @@ Tuy nhiên, phần lớn người xem phim gặp phải những vấn đề sau:
 
 ## 👥 Thành viên nhóm
 
-| Họ tên | Vai trò | GitHub |
-|--------|---------|--------|
-| ... | ... | ... |
+| Họ tên |MSSV| Vai trò | GitHub |
+|--------|---------|--------|--------|
+| Bùi Khánh Linh | 24100543 | ... | ... |
+| Nguyễn Đức Toàn | 24100230 | ... | ... |
+| Nguyễn Thị Thu Ngân | 23010894 | ... | ... |
