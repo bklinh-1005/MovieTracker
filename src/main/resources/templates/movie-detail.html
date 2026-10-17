@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${movie.title + ' - Movie Tracker'}">Chi tiết phim</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; }
+        .navbar { background-color: #1e293b !important; border-bottom: 1px solid #334155; }
+        .panel-box { background-color: #1e293b; border: 1px solid #334155; border-radius: 14px; }
+        .poster-lg { width: 100%; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); }
+        .form-control, .form-select { background-color: #0f172a; border-color: #334155; color: #f8fafc; }
+        .form-control:focus, .form-select:focus { background-color: #0f172a; color: #fff; border-color: #e50914; box-shadow: none; }
+        .btn-brand { background-color: #e50914; color: white; border: none; }
+        .btn-brand:hover { background-color: #b80710; color: white; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark py-3">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-4 text-danger" href="/"><i class="fa-solid fa-clapperboard me-2"></i>MOVIE TRACKER</a>
+        <div class="d-flex gap-2">
+            <a href="/" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách</a>
+            <a sec:authorize="isAuthenticated()" href="/profile" class="btn btn-warning btn-sm fw-semibold">Tủ phim cá nhân</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <div th:if="${param.updated}" class="alert alert-success">
+        <i class="fa-solid fa-circle-check me-2"></i>Đã lưu trạng thái xem và đánh giá của bạn thành công!
+    </div>
+
+    <!-- Thông tin Chi tiết Phim (Chức năng số 3) -->
+    <div class="panel-box p-4 mb-4">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <img th:src="${movie.posterPath}" class="poster-lg" th:alt="${movie.title}">
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <span class="badge bg-danger" th:text="${movie.releaseYear}"></span>
+                    <span class="badge bg-warning text-dark fw-bold"><i class="fa-solid fa-star me-1"></i>TMDB: <span th:text="${movie.voteAverage}"></span>/10</span>
+                    <span class="badge bg-info text-dark" th:text="${movie.genres}"></span>
+                </div>
+
+                <h2 class="fw-bold mb-3" th:text="${movie.title}"></h2>
+                <p class="lead fs-6 text-light" th:text="${movie.overview}"></p>
+
+                <div class="row mt-3 mb-3">
+                    <div class="col-sm-6">
+                        <p class="mb-1"><strong class="text-warning"><i class="fa-solid fa-video me-2"></i>Đạo diễn:</strong> <span th:text="${movie.director}"></span></p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p class="mb-1"><strong class="text-info"><i class="fa-solid fa-users me-2"></i>Diễn viên:</strong> <span th:text="${movie.castMembers}"></span></p>
+                    </div>
+                </div>
+
+                <!-- Nhúng Trailer YouTube nếu có -->
+                <div th:if="${movie.trailerKey != null and !movie.trailerKey.isEmpty()}" class="mt-3">
+                    <h6 class="fw-bold text-danger"><i class="fa-brands fa-youtube me-2"></i>Trailer Chính Thức</h6>
+                    <div class="ratio ratio-16x9 rounded overflow-hidden border border-secondary" style="max-width: 560px;">
+                        <iframe th:src="'https://www.youtube.com/embed/' + ${movie.trailerKey}" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Form Đánh dấu Trạng thái & Chấm sao (Chức năng 4 & 5) -->
+        <div class="col-lg-5">
+            <div class="panel-box p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-bookmark text-warning me-2"></i>Trạng thái xem & Đánh giá cá nhân</h5>
+
+                <div sec:authorize="!isAuthenticated()" class="alert alert-secondary text-dark">
+                    Vui lòng <a href="/login" class="fw-bold text-danger">Đăng nhập</a> để lưu trạng thái xem phim và viết cảm nhận cá nhân.
+                </div>
+
+                <form sec:authorize="isAuthenticated()" th:action="@{/movies/{id}/track(id=${movie.id})}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">1. Trạng thái xem phim:</label>
+                        <select name="status" class="form-select" required>
+                            <option value="WATCHLIST" th:selected="${userEntry != null and userEntry.status.name() == 'WATCHLIST'}">📌 Muốn xem (Watchlist)</option>
+                            <option value="WATCHING" th:selected="${userEntry != null and userEntry.status.name() == 'WATCHING'}">🍿 Đang xem (Watching - Series)</option>
+                            <option value="WATCHED" th:selected="${userEntry != null and userEntry.status.name() == 'WATCHED'}">✅ Đã xem (Watched)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">2. Chấm điểm của bạn (Thang 1 - 5 sao):</label>
+                        <select name="rating" class="form-select">
+                            <option value="">-- Chưa chấm điểm --</option>
+                            <option value="5" th:selected="${userEntry != null and userEntry.rating == 5}">⭐⭐⭐⭐⭐ (5/5 - Tuyệt phẩm)</option>
+                            <option value="4" th:selected="${userEntry != null and userEntry.rating == 4}">⭐⭐⭐⭐ (4/5 - Rất hay)</option>
+                            <option value="3" th:selected="${userEntry != null and userEntry.rating == 3}">⭐⭐⭐ (3/5 - Khá ổn)</option>
+                            <option value="2" th:selected="${userEntry != null and userEntry.rating == 2}">⭐⭐ (2/5 - Trung bình)</option>
+                            <option value="1" th:selected="${userEntry != null and userEntry.rating == 1}">⭐ (1/5 - Không hợp gu)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">3. Ghi chú & Cảm nhận cá nhân:</label>
+                        <textarea name="reviewComment" rows="4" class="form-control" placeholder="Viết cảm nhận của bạn sau khi xem bộ phim này..." th:text="${userEntry != null ? userEntry.reviewComment : ''}"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-brand w-100 fw-semibold py-2">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Trạng Thái & Đánh Giá
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Danh sách Cảm nhận của Cộng đồng -->
+        <div class="col-lg-7">
+            <div class="panel-box p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-comments text-info me-2"></i>Đánh giá & Cảm nhận từ người xem (<span th:text="${reviews.size()}"></span>)</h5>
+
+                <div th:if="${reviews.isEmpty()}" class="text-secondary py-4 text-center">
+                    Chưa có nhận xét nào cho bộ phim này. Hãy là người đầu tiên viết cảm nhận!
+                </div>
+
+                <div th:each="rev : ${reviews}" class="border-bottom border-secondary pb-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-warning"><i class="fa-solid fa-user-circle me-1"></i><span th:text="${rev.user.fullName != null ? rev.user.fullName : rev.user.username}"></span></strong>
+                        <span th:if="${rev.rating != null}" class="badge bg-warning text-dark">
+                            <i class="fa-solid fa-star me-1"></i><span th:text="${rev.rating + '/5 sao'}"></span>
+                        </span>
+                    </div>
+                    <p class="mb-1 text-light" th:text="${rev.reviewComment}"></p>
+                    <small class="text-secondary" th:text="${#temporals.format(rev.updatedAt, 'dd/MM/yyyy HH:mm')}"></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

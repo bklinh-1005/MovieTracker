@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký tài khoản - Movie Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; align-items: center; }
+        .auth-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; max-width: 450px; width: 100%; }
+        .form-control { background-color: #0f172a; border-color: #334155; color: #fff; }
+    </style>
+</head>
+<body>
+<div class="container d-flex justify-content-center">
+    <div class="auth-card p-4 shadow-lg">
+        <h3 class="fw-bold text-center text-danger mb-1">Tạo Tài Khoản Mới</h3>
+        <p class="text-center text-secondary small mb-3">Tham gia hệ thống theo dõi & đánh giá phim</p>
+
+        <div th:if="${error}" class="alert alert-danger py-2 small" th:text="${error}"></div>
+
+        <form th:action="@{/register}" method="post">
+            <div class="mb-3">
+                <label class="form-label small">Họ và tên</label>
+                <input type="text" name="fullName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small">Tên đăng nhập (Username)</label>
+                <input type="text" name="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small">Email</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small">Mật khẩu</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-danger w-100 fw-semibold py-2">Hoàn Tất Đăng Ký</button>
+        </form>
+        <div class="text-center mt-3 small">
+            <a href="/login" class="text-warning">Đã có tài khoản? Đăng nhập</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

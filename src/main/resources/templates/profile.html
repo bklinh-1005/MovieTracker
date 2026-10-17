@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ cá nhân & Thống kê - Movie Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; }
+        .navbar { background-color: #1e293b !important; border-bottom: 1px solid #334155; }
+        .stat-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 14px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark py-3">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-4 text-danger" href="/"><i class="fa-solid fa-clapperboard me-2"></i>MOVIE TRACKER</a>
+        <div class="d-flex gap-2">
+            <a href="/" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-compass me-1"></i>Khám phá thêm phim</a>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Đăng xuất</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <!-- Thông tin tài khoản & Số liệu thống kê tổng quan (Chức năng số 6) -->
+    <div class="stat-card p-4 mb-4">
+        <h4 class="fw-bold mb-1"><i class="fa-solid fa-chart-pie text-warning me-2"></i>Thống kê Điện ảnh của <span class="text-info" th:text="${user.fullName != null ? user.fullName : user.username}"></span></h4>
+        <p class="text-secondary small mb-4">Email: <span th:text="${user.email}"></span> | Vai trò: <span class="badge bg-secondary" th:text="${user.role}"></span></p>
+
+        <div class="row g-3 text-center">
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded bg-dark border border-success">
+                    <h2 class="fw-bold text-success mb-0" th:text="${stats.watchedCount}">0</h2>
+                    <small class="text-secondary">✅ Phim Đã Xem</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded bg-dark border border-warning">
+                    <h2 class="fw-bold text-warning mb-0" th:text="${stats.watchlistCount}">0</h2>
+                    <small class="text-secondary">📌 Muốn Xem (Watchlist)</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded bg-dark border border-info">
+                    <h2 class="fw-bold text-info mb-0" th:text="${stats.watchingCount}">0</h2>
+                    <small class="text-secondary">🍿 Đang Xem</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded bg-dark border border-danger">
+                    <h2 class="fw-bold text-danger mb-0"><span th:text="${stats.avgRating}">0.0</span> ⭐</h2>
+                    <small class="text-secondary">Điểm Đánh Giá TB</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bộ lọc theo trạng thái -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <h5 class="fw-bold m-0"><i class="fa-solid fa-list-check me-2 text-danger"></i>Tủ Phim Cá Nhân</h5>
+        <div class="btn-group btn-group-sm">
+            <a href="/profile" class="btn" th:classappend="${selectedStatus == null ? 'btn-danger' : 'btn-outline-light'}">Tất cả</a>
+            <a href="/profile?status=WATCHED" class="btn" th:classappend="${selectedStatus != null and selectedStatus.name() == 'WATCHED' ? 'btn-success' : 'btn-outline-light'}">Đã xem</a>
+            <a href="/profile?status=WATCHLIST" class="btn" th:classappend="${selectedStatus != null and selectedStatus.name() == 'WATCHLIST' ? 'btn-warning' : 'btn-outline-light'}">Muốn xem</a>
+            <a href="/profile?status=WATCHING" class="btn" th:classappend="${selectedStatus != null and selectedStatus.name() == 'WATCHING' ? 'btn-info' : 'btn-outline-light'}">Đang xem</a>
+        </div>
+    </div>
+
+    <div th:if="${entries.isEmpty()}" class="stat-card p-5 text-center mb-4">
+        <p class="text-secondary mb-3">Danh sách của bạn đang trống ở mục này.</p>
+        <a href="/" class="btn btn-danger btn-sm">Khám phá và thêm phim ngay</a>
+    </div>
+
+    <!-- Danh sách lịch sử phim đã lưu -->
+    <div class="stat-card p-3 mb-4" th:if="${!entries.isEmpty()}">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>Phim</th>
+                    <th>Trạng thái</th>
+                    <th>Điểm cá nhân</th>
+                    <th>Cảm nhận đã ghi</th>
+                    <th>Cập nhật</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${entries}">
+                    <td>
+                        <a th:href="@{/movies/{id}(id=${item.movie.id})}" class="text-decoration-none text-white fw-bold" th:text="${item.movie.title}"></a>
+                        <div class="small text-secondary" th:text="${item.movie.releaseYear + ' • ' + item.movie.director}"></div>
+                    </td>
+                    <td>
+                        <span th:if="${item.status.name() == 'WATCHED'}" class="badge bg-success">Đã xem</span>
+                        <span th:if="${item.status.name() == 'WATCHLIST'}" class="badge bg-warning text-dark">Muốn xem</span>
+                        <span th:if="${item.status.name() == 'WATCHING'}" class="badge bg-info text-dark">Đang xem</span>
+                    </td>
+                    <td>
+                        <span th:if="${item.rating != null}" class="text-warning fw-bold" th:text="${item.rating + ' ⭐'}"></span>
+                        <span th:if="${item.rating == null}" class="text-secondary small">Chưa chấm</span>
+                    </td>
+                    <td class="small text-light" style="max-width: 280px;" th:text="${item.reviewComment != null and !item.reviewComment.isEmpty() ? item.reviewComment : '-'}"></td>
+                    <td class="small text-secondary" th:text="${#temporals.format(item.updatedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a th:href="@{/movies/{id}(id=${item.movie.id})}" class="btn btn-outline-info btn-sm"><i class="fa-solid fa-pen"></i></a>
+                            <form th:action="@{/movies/{id}/remove(id=${item.movie.id})}" method="post" class="m-0">
+                                <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Chức năng mở rộng: Gợi ý phim cá nhân hóa -->
+    <div class="stat-card p-4" th:if="${stats.recommendations != null and !stats.recommendations.isEmpty()}">
+        <h5 class="fw-bold mb-3"><i class="fa-solid fa-wand-magic-sparkles text-warning me-2"></i>Gợi ý Phim Dành Riêng Cho Bạn</h5>
+        <div class="row row-cols-1 row-cols-md-4 g-3">
+            <div class="col" th:each="rec : ${stats.recommendations}">
+                <div class="p-3 rounded bg-dark border border-secondary h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <h6 class="fw-bold text-white mb-1" th:text="${rec.title}"></h6>
+                        <p class="small text-info mb-2" th:text="${rec.genres}"></p>
+                    </div>
+                    <a th:href="@{/movies/{id}(id=${rec.id})}" class="btn btn-outline-warning btn-sm w-100">Xem thử</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

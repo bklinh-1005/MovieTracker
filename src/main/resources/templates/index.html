@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Tracker - Hệ thống theo dõi & đánh giá phim</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background-color: #1e293b !important; border-bottom: 1px solid #334155; }
+        .hero-box { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; border-radius: 16px; }
+        .movie-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; overflow: hidden; transition: transform 0.25s, box-shadow 0.25s; height: 100%; }
+        .movie-card:hover { transform: translateY(-6px); box-shadow: 0 12px 24px rgba(0,0,0,0.5); border-color: #e50914; }
+        .movie-poster { height: 340px; width: 100%; object-fit: cover; }
+        .badge-rating { background-color: #f59e0b; color: #000; font-weight: 700; }
+        .btn-brand { background-color: #e50914; color: white; border: none; }
+        .btn-brand:hover { background-color: #b80710; color: white; }
+        .form-control, .form-select { background-color: #0f172a; border-color: #334155; color: #f8fafc; }
+        .form-control:focus, .form-select:focus { background-color: #0f172a; color: #fff; border-color: #e50914; box-shadow: none; }
+        .form-control::placeholder { color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<!-- Thanh điều hướng (Navbar) -->
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top py-3">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-4 text-danger" href="/">
+            <i class="fa-solid fa-clapperboard me-2"></i>MOVIE TRACKER
+        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="/" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-house me-1"></i>Trang chủ</a>
+
+            <div sec:authorize="isAuthenticated()" class="d-flex align-items-center gap-2">
+                <a href="/profile" class="btn btn-warning btn-sm fw-semibold">
+                    <i class="fa-solid fa-user-astronaut me-1"></i>Tủ phim & Thống kê (<span sec:authentication="name"></span>)
+                </a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin" class="btn btn-info btn-sm fw-semibold">
+                    <i class="fa-solid fa-shield-halved me-1"></i>Quản trị
+                </a>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Đăng xuất</button>
+                </form>
+            </div>
+
+            <div sec:authorize="!isAuthenticated()" class="d-flex gap-2">
+                <a href="/login" class="btn btn-outline-light btn-sm">Đăng nhập</a>
+                <a href="/register" class="btn btn-brand btn-sm">Đăng ký</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <!-- Khu vực Tìm kiếm & Bộ lọc (Chức năng số 2) -->
+    <div class="hero-box p-4 mb-4 shadow">
+        <h3 class="fw-bold mb-2"><i class="fa-solid fa-compass text-danger me-2"></i>Khám phá & Theo dõi Điện ảnh</h3>
+        <p class="text-secondary mb-3">Lưu lịch sử xem phim, quản lý Watchlist và ghi lại cảm nhận cá nhân của riêng bạn.</p>
+
+        <form action="/" method="get" class="row g-2">
+            <div class="col-md-5">
+                <input type="text" name="query" th:value="${query}" class="form-control" placeholder="Tìm theo tên phim hoặc đạo diễn (VD: Inception, Nolan)...">
+            </div>
+            <div class="col-md-3">
+                <select name="genre" class="form-select">
+                    <option value="">-- Tất cả thể loại --</option>
+                    <option value="Hành động" th:selected="${genre == 'Hành động'}">Hành động</option>
+                    <option value="Khoa học viễn tưởng" th:selected="${genre == 'Khoa học viễn tưởng'}">Khoa học viễn tưởng</option>
+                    <option value="Chính kịch" th:selected="${genre == 'Chính kịch'}">Chính kịch</option>
+                    <option value="Hoạt hình" th:selected="${genre == 'Hoạt hình'}">Hoạt hình</option>
+                    <option value="Tâm lý" th:selected="${genre == 'Tâm lý'}">Tâm lý</option>
+                    <option value="Lãng mạn" th:selected="${genre == 'Lãng mạn'}">Lãng mạn</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="year" th:value="${year}" class="form-control" placeholder="Năm (VD: 2023)">
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-brand w-100 fw-semibold"><i class="fa-solid fa-magnifying-glass me-1"></i>Lọc</button>
+                <a href="/" class="btn btn-secondary" title="Xóa bộ lọc"><i class="fa-solid fa-rotate-left"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Danh sách Phim Thịnh hành / Kết quả tìm kiếm -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold m-0">
+            <i class="fa-solid fa-fire text-warning me-2"></i>
+            <span th:text="${(query != null and !query.isEmpty()) or (genre != null and !genre.isEmpty()) or year != null ? 'Kết quả tìm kiếm & lọc phim' : 'Danh sách Phim Thịnh Hành'}"></span>
+        </h4>
+        <span class="badge bg-secondary" th:text="${movies.size() + ' bộ phim'}"></span>
+    </div>
+
+    <div th:if="${movies.isEmpty()}" class="alert alert-dark border-secondary text-center py-5">
+        <i class="fa-solid fa-film fs-1 text-secondary mb-3 d-block"></i>
+        <h5>Không tìm thấy bộ phim nào khớp với bộ lọc của bạn.</h5>
+        <a href="/" class="btn btn-brand btn-sm mt-2">Xem toàn bộ phim</a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        <div class="col" th:each="movie : ${movies}">
+            <div class="movie-card d-flex flex-column">
+                <div class="position-relative">
+                    <img th:src="${movie.posterPath}" class="movie-poster" th:alt="${movie.title}">
+                    <span class="badge badge-rating position-absolute top-0 end-0 m-2 px-2 py-1">
+                        <i class="fa-solid fa-star me-1"></i><span th:text="${movie.voteAverage}"></span>
+                    </span>
+                    <span class="badge bg-dark bg-opacity-75 position-absolute bottom-0 start-0 m-2" th:text="${movie.releaseYear}"></span>
+                </div>
+                <div class="p-3 d-flex flex-column flex-grow-1">
+                    <h6 class="fw-bold mb-1 text-truncate" th:title="${movie.title}" th:text="${movie.title}"></h6>
+                    <p class="text-info small mb-2 text-truncate" th:text="${movie.genres}"></p>
+                    <p class="text-secondary small mb-3 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" th:text="${movie.overview}"></p>
+                    <a th:href="@{/movies/{id}(id=${movie.id})}" class="btn btn-outline-light btn-sm w-100 mt-auto">
+                        <i class="fa-solid fa-circle-info me-1"></i>Chi tiết & Đánh giá
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
