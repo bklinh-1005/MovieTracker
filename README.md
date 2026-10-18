@@ -83,6 +83,11 @@ Tuy nhiên, phần lớn người xem phim gặp phải những vấn đề sau:
 
 | Họ tên |MSSV| Vai trò | GitHub |
 |--------|---------|--------|--------|
-| Bùi Khánh Linh | 24100543 | ... | ... |
-| Nguyễn Đức Toàn | 24100230 | ... | ... |
-| Nguyễn Thị Thu Ngân | 23010894 | ... | ... |
+| Bùi Khánh Linh | 24100543 | Trưởng nhóm | ... |
+| Nguyễn Đức Toàn | 24100230 | Thành viên | ... |
+| Nguyễn Thị Thu Ngân | 23010894 | Thành viên... |
+##Hướng dẫn sử dụng hệ thống
+- **Tải project xuống và giải nén** 
+- **Mở bằng VSCode hoặc IntelliJ IDEA và chạy project**
+- **Sau khi chạy thành công, truy cập vào : http://localhost:8080** 
+- **Mẫu đăng nhập** - username: admin, pass: 123456 sử dụng cho phân quyền quản trị viên. 
