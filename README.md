@@ -90,4 +90,5 @@ Tuy nhiên, phần lớn người xem phim gặp phải những vấn đề sau:
 - **Tải project xuống và giải nén** 
 - **Mở bằng VSCode hoặc IntelliJ IDEA và chạy project**
 - **Sau khi chạy thành công, truy cập vào : http://localhost:8080** 
-- **Mẫu đăng nhập** - username: admin, pass: 123456 sử dụng cho phân quyền quản trị viên. 
+- **Mẫu đăng nhập** - username: admin, pass: 123456 sử dụng cho phân quyền quản trị viên.
+- **Pass **: 123456789** 
